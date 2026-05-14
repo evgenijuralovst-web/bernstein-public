@@ -1030,8 +1030,10 @@
     scheduleNextForCurrent();
   })();
 
-  /* Visit-request modal — open/close + a11y (Escape, backdrop, focus restore) */
-  (function () {
+  /* Visit-request modal — open/close + a11y (Escape, backdrop, focus restore).
+     Wait for DOMContentLoaded because the <div id="visit-modal"> lives AFTER
+     this <script> in the document, so it isn't in the DOM at parse time. */
+  function initVisitModal() {
     const modal = document.getElementById('visit-modal');
     if (!modal) return;
     const backdrop = modal.querySelector('.cta-modal__backdrop');
@@ -1062,7 +1064,12 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') close();
     });
-  })();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVisitModal);
+  } else {
+    initVisitModal();
+  }
 </script>
 
 <!-- Visit-request modal -->
