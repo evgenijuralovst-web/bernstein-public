@@ -519,13 +519,38 @@
     </div>
   </div>
 
-  <div class="max-w-6xl mx-auto px-6 lg:px-10 pb-20 lg:pb-32">
-    <div class="map-frame w-full border border-sage/30 overflow-hidden">
+  <div class="max-w-6xl mx-auto px-6 lg:px-10 pt-12 pb-20 lg:pb-32">
+    <!-- Caption above map -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <p class="text-brown text-xs tracking-[0.3em] uppercase mb-2 font-medium">
+          <span data-lang="fr">Adresse</span>
+          <span data-lang="en">Address</span>
+          <span data-lang="de">Adresse</span>
+        </p>
+        <p class="text-ink text-lg lg:text-xl font-light">
+          <span data-lang="fr">Trengen Knapp · L-5351 Oetrange · Luxembourg</span>
+          <span data-lang="en">Trengen Knapp · L-5351 Oetrange · Luxembourg</span>
+          <span data-lang="de">Trengen Knapp · L-5351 Oetrange · Luxemburg</span>
+        </p>
+      </div>
+      <a href="https://www.google.com/maps/search/?api=1&query=Trengen+Knapp%2C+L-5351+Oetrange%2C+Luxembourg"
+         target="_blank" rel="noopener noreferrer"
+         class="inline-flex items-center gap-2 text-sm tracking-[0.1em] uppercase text-sage hover:text-sage-dark transition-colors self-start sm:self-end">
+        <span data-lang="fr">Ouvrir dans Google Maps</span>
+        <span data-lang="en">Open in Google Maps</span>
+        <span data-lang="de">In Google Maps öffnen</span>
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <!-- Map with pin marker on the actual address -->
+    <div class="map-frame w-full rounded-lg shadow-xl ring-1 ring-sage/30 overflow-hidden">
       <iframe
-        src="https://maps.google.com/maps?q=Oetrange%20L-5351%20Luxembourg&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        src="https://www.google.com/maps?q=Trengen+Knapp%2C+L-5351+Oetrange%2C+Luxembourg&z=16&hl=fr&output=embed"
         width="100%" height="100%" style="border:0" loading="lazy" allowfullscreen
         referrerpolicy="no-referrer-when-downgrade"
-        title="Map showing TRENGEN KNAPP location in Oetrange, Luxembourg"></iframe>
+        title="Map showing TRENGEN KNAPP at Trengen Knapp street, L-5351 Oetrange, Luxembourg"></iframe>
     </div>
   </div>
 </section>
