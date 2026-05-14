@@ -68,15 +68,23 @@
   html[lang="en"] [data-lang="en"],
   html[lang="de"] [data-lang="de"] { display: revert; }
 
-  /* Hero overlay */
+  /* Hero overlay — stacked: horizontal left-dim (for text legibility) + vertical (top + bottom dim) */
   .hero-overlay {
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.50) 0%,
-      rgba(0,0,0,0.20) 35%,
-      rgba(0,0,0,0.20) 60%,
-      rgba(0,0,0,0.70) 100%
-    );
+    background:
+      linear-gradient(
+        to right,
+        rgba(0,0,0,0.70) 0%,
+        rgba(0,0,0,0.50) 25%,
+        rgba(0,0,0,0.15) 60%,
+        rgba(0,0,0,0.00) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.45) 0%,
+        rgba(0,0,0,0.15) 35%,
+        rgba(0,0,0,0.15) 60%,
+        rgba(0,0,0,0.70) 100%
+      );
   }
 
   .lang-btn { transition: color 0.15s, border-color 0.15s; }
@@ -111,8 +119,8 @@
 <header class="absolute top-0 inset-x-0 z-30">
   <div class="max-w-7xl mx-auto px-6 lg:px-10 py-6 flex items-center justify-between">
     <a href="#hero" class="flex items-center gap-3 text-white">
-      <img src="assets/logo-bernstein.png" alt="Bernstein Promotion logo"
-           class="h-9 w-auto" style="filter: brightness(0) invert(1); opacity: 0.95;">
+      <img src="assets/logo-bernstein-v2.png" alt="Bernstein Promotion logo"
+           class="h-16 md:h-20 w-auto" style="filter: drop-shadow(0 2px 8px rgba(0,0,0,0.45));">
     </a>
     <nav aria-label="Language" class="flex items-center gap-1 text-white/85 text-sm tracking-wide">
       <button data-lang-btn="fr" class="lang-btn px-3 py-1 border-b border-transparent uppercase font-medium" aria-current="true">FR</button>
