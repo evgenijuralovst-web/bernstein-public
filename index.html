@@ -159,7 +159,7 @@
   <div id="hero-carousel" class="absolute inset-0">
     <!-- Slide 1: Video (autoplay, muted, loop, playsinline for mobile) -->
     <video class="hero-slide hero-slide--active absolute inset-0 w-full h-full object-cover"
-           autoplay muted loop playsinline preload="auto"
+           autoplay muted playsinline preload="auto"
            poster="assets/hero-aerial-v3.jpg"
            aria-label="Aerial cinematic flythrough of TRENGEN KNAPP at golden hour">
       <source src="assets/hero-video.mp4" type="video/mp4">
@@ -873,39 +873,81 @@
     }
   })();
 
-  /* Hero carousel — auto-rotate slides + clickable nav dots */
+  /* Hero carousel — duration-aware rotation:
+     - VIDEO slide: stays until the video's 'ended' event fires (full playback),
+       with a generous fallback timeout in case 'ended' never reaches us.
+     - IMAGE slide: stays for a fixed 8 s.
+     Manual click on a nav dot interrupts the schedule and restarts it for the new slide. */
   (function () {
     const slides = document.querySelectorAll('#hero-carousel .hero-slide');
     const dots = document.querySelectorAll('#hero-dots .hero-dot');
     if (slides.length < 2) return;
 
-    const SLIDE_MS = 8000;   /* 8 sec per slide */
+    const IMAGE_MS = 8000;             /* image stays 8 sec */
+    const VIDEO_FALLBACK_MS = 30000;   /* if 'ended' never fires, cap at 30 s */
     let idx = 0;
-    let timer;
+    let timeoutId = null;
+    let endedListener = null;
+    let endedTarget = null;
+
+    function clearSchedule() {
+      if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+      if (endedListener && endedTarget) {
+        endedTarget.removeEventListener('ended', endedListener);
+        endedListener = null;
+        endedTarget = null;
+      }
+    }
+
+    function scheduleNextForCurrent() {
+      const active = slides[idx];
+      if (active.tagName === 'VIDEO') {
+        endedTarget = active;
+        endedListener = () => next();
+        active.addEventListener('ended', endedListener, { once: true });
+        timeoutId = setTimeout(next, VIDEO_FALLBACK_MS);
+      } else {
+        timeoutId = setTimeout(next, IMAGE_MS);
+      }
+    }
 
     function show(n) {
+      clearSchedule();
+      /* pause any currently-active video before switching */
+      const prev = slides[idx];
+      if (prev && prev.tagName === 'VIDEO') { try { prev.pause(); } catch (e) {} }
+
       idx = (n + slides.length) % slides.length;
       slides.forEach((el, i) => el.classList.toggle('hero-slide--active', i === idx));
       dots.forEach((d, i) => d.classList.toggle('hero-dot--active', i === idx));
-      /* If new slide is the video, restart it from 0 so the user sees the opening shot */
+
       const active = slides[idx];
       if (active.tagName === 'VIDEO') {
         try { active.currentTime = 0; active.play(); } catch (e) {}
       }
+      scheduleNextForCurrent();
     }
     function next() { show(idx + 1); }
-    function start() { clearInterval(timer); timer = setInterval(next, SLIDE_MS); }
 
     dots.forEach((d, i) => {
-      d.addEventListener('click', () => { show(i); start(); });
+      d.addEventListener('click', () => show(i));
     });
 
-    /* Pause auto-rotate when tab is hidden (saves CPU + bandwidth) */
+    /* Pause carousel + active video when tab is hidden; resume on return */
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) clearInterval(timer); else start();
+      const active = slides[idx];
+      if (document.hidden) {
+        clearSchedule();
+        if (active && active.tagName === 'VIDEO') { try { active.pause(); } catch (e) {} }
+      } else {
+        if (active && active.tagName === 'VIDEO') { try { active.play(); } catch (e) {} }
+        scheduleNextForCurrent();
+      }
     });
 
-    start();
+    /* Initial wiring — slide 0 (video) is already active in HTML + autoplaying.
+       Just schedule the transition off this slide. */
+    scheduleNextForCurrent();
   })();
 </script>
 
