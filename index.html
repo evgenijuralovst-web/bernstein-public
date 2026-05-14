@@ -68,6 +68,27 @@
   html[lang="en"] [data-lang="en"],
   html[lang="de"] [data-lang="de"] { display: revert; }
 
+  /* Hero carousel — cross-fade between slides (image + video). Active slide opacity 1, others 0. */
+  .hero-slide {
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+    pointer-events: none;
+  }
+  .hero-slide.hero-slide--active {
+    opacity: 1;
+  }
+
+  /* Hero carousel nav dots */
+  .hero-dot {
+    width: 8px; height: 8px; border-radius: 9999px;
+    background: rgba(255,255,255,0.45);
+    transition: background 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    border: 0; padding: 0;
+  }
+  .hero-dot:hover { background: rgba(255,255,255,0.75); transform: scale(1.2); }
+  .hero-dot.hero-dot--active { background: #ffffff; transform: scale(1.2); }
+
   /* Hero overlay — stacked: horizontal left-dim (for text legibility) + vertical (top + bottom dim) */
   .hero-overlay {
     background:
@@ -134,9 +155,27 @@
 
 <!-- ───────────── HERO ───────────── -->
 <section id="hero" class="relative h-screen min-h-[600px] w-full overflow-hidden">
-  <img src="assets/hero-aerial-v3.jpg"
-       alt="Aerial dusk view of TRENGEN KNAPP — six modern townhouses with warm interior lighting, in a quiet Luxembourg suburb"
-       class="absolute inset-0 w-full h-full object-cover" fetchpriority="high">
+  <!-- Carousel slides -->
+  <div id="hero-carousel" class="absolute inset-0">
+    <!-- Slide 1: Video (autoplay, muted, loop, playsinline for mobile) -->
+    <video class="hero-slide hero-slide--active absolute inset-0 w-full h-full object-cover"
+           autoplay muted loop playsinline preload="auto"
+           poster="assets/hero-aerial-v3.jpg"
+           aria-label="Aerial cinematic flythrough of TRENGEN KNAPP at golden hour">
+      <source src="assets/hero-video.mp4" type="video/mp4">
+    </video>
+    <!-- Slide 2: Static photo (kept as carousel slide + serves as og:image + video poster fallback) -->
+    <img src="assets/hero-aerial-v3.jpg"
+         alt="Aerial view of TRENGEN KNAPP — six modern townhouses in a quiet Luxembourg suburb"
+         class="hero-slide absolute inset-0 w-full h-full object-cover" fetchpriority="high">
+  </div>
+
+  <!-- Nav dots (positioned bottom-center of hero, above overlay) -->
+  <div id="hero-dots" class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2" role="tablist" aria-label="Hero slides">
+    <button class="hero-dot hero-dot--active" data-slide="0" aria-label="Slide 1 — video"></button>
+    <button class="hero-dot" data-slide="1" aria-label="Slide 2 — photo"></button>
+  </div>
+
   <div class="absolute inset-0 hero-overlay"></div>
 
   <div class="relative h-full flex flex-col justify-center items-start max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-16">
@@ -832,6 +871,41 @@
     } else {
       setLang('fr');
     }
+  })();
+
+  /* Hero carousel — auto-rotate slides + clickable nav dots */
+  (function () {
+    const slides = document.querySelectorAll('#hero-carousel .hero-slide');
+    const dots = document.querySelectorAll('#hero-dots .hero-dot');
+    if (slides.length < 2) return;
+
+    const SLIDE_MS = 8000;   /* 8 sec per slide */
+    let idx = 0;
+    let timer;
+
+    function show(n) {
+      idx = (n + slides.length) % slides.length;
+      slides.forEach((el, i) => el.classList.toggle('hero-slide--active', i === idx));
+      dots.forEach((d, i) => d.classList.toggle('hero-dot--active', i === idx));
+      /* If new slide is the video, restart it from 0 so the user sees the opening shot */
+      const active = slides[idx];
+      if (active.tagName === 'VIDEO') {
+        try { active.currentTime = 0; active.play(); } catch (e) {}
+      }
+    }
+    function next() { show(idx + 1); }
+    function start() { clearInterval(timer); timer = setInterval(next, SLIDE_MS); }
+
+    dots.forEach((d, i) => {
+      d.addEventListener('click', () => { show(i); start(); });
+    });
+
+    /* Pause auto-rotate when tab is hidden (saves CPU + bandwidth) */
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) clearInterval(timer); else start();
+    });
+
+    start();
   })();
 </script>
 
